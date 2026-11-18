@@ -5,10 +5,10 @@ export const STAGES = 50;
 /** 등급 = 시야. p = 화면에 보이는 미로 넓이 ÷ 전체 넓이 */
 export const GRADES = [
   { name: "초보", p: 1.0 },
-  { name: "중급", p: 0.7 },
-  { name: "고급", p: 0.5 },
-  { name: "특급", p: 0.3 },
-  { name: "신", p: 0.1 },
+  { name: "중급", p: 0.5 },
+  { name: "고급", p: 0.3 },
+  { name: "특급", p: 0.15 },
+  { name: "신", p: 0.05 },
 ] as const;
 
 export const N = 1, E = 2, S = 4, W = 8;
