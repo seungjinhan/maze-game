@@ -31,8 +31,6 @@ export const ko: Dict = {
   lockedUntil: prev => `${prev} 50단계를 깨면 열려요`,
   spaceSub: "숨어 있던 별빛 미로 · 엄마를 구해요",
   stagesSub: (p, c) => `미로의 ${p}%가 보여요 · 깬 단계 ${c}/50`,
-  chapterTitle: n => `${n}챕터`,
-  chapterRange: (f, l, n) => `${f}~${l}단계 · ${n}×${n}칸`,
   stageLabel: n => `${n}단계`,
   tryNow: "도전",
   locked: "잠김",

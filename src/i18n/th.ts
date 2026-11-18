@@ -28,8 +28,6 @@ export const th: Dict = {
   lockedUntil: prev => `ผ่าน${prev}ครบ 50 ด่านเพื่อปลดล็อก`,
   spaceSub: "เขาวงกตแสงดาวที่ซ่อนอยู่ · ช่วยแม่",
   stagesSub: (p, c) => `เห็นเขาวงกต ${p}% · ผ่านแล้ว ${c}/50`,
-  chapterTitle: n => `บทที่ ${n}`,
-  chapterRange: (f, l, n) => `ด่าน ${f}–${l} · ${n}×${n} ช่อง`,
   stageLabel: n => `ด่าน ${n}`,
   tryNow: "ลุย",
   locked: "ล็อกอยู่",

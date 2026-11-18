@@ -28,8 +28,6 @@ export const ja: Dict = {
   lockedUntil: prev => `${prev}の50ステージをクリアで解放`,
   spaceSub: "隠れていた星明かりの迷路・お母さんを助ける",
   stagesSub: (p, c) => `迷路の${p}%が見える・クリア ${c}/50`,
-  chapterTitle: n => `第${n}章`,
-  chapterRange: (f, l, n) => `${f}〜${l}ステージ・${n}×${n}マス`,
   stageLabel: n => `ステージ${n}`,
   tryNow: "挑戦",
   locked: "ロック中",

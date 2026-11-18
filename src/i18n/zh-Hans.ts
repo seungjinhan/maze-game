@@ -28,8 +28,6 @@ export const zhHans: Dict = {
   lockedUntil: prev => `通过${prev}50关后开启`,
   spaceSub: "隐藏的星光迷宫・救出妈妈",
   stagesSub: (p, c) => `可见迷宫的${p}%・已过关 ${c}/50`,
-  chapterTitle: n => `第${n}章`,
-  chapterRange: (f, l, n) => `第${f}～${l}关・${n}×${n}格`,
   stageLabel: n => `第${n}关`,
   tryNow: "挑战",
   locked: "未开启",

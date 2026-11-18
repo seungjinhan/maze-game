@@ -31,8 +31,6 @@ export const id: Dict = {
   lockedUntil: prev => `Terbuka setelah 50 level ${prev} selesai`,
   spaceSub: "Labirin cahaya bintang yang tersembunyi · Selamatkan Ibu",
   stagesSub: (p, c) => `Terlihat ${p}% labirin · Selesai ${c}/50`,
-  chapterTitle: n => `Bab ${n}`,
-  chapterRange: (f, l, n) => `Level ${f}–${l} · ${n}×${n} kotak`,
   stageLabel: n => `Level ${n}`,
   tryNow: "Main",
   locked: "Terkunci",

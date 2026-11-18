@@ -28,8 +28,6 @@ export const vi: Dict = {
   lockedUntil: prev => `Mở khi qua 50 màn ${prev}`,
   spaceSub: "Mê cung ánh sao ẩn giấu · Cứu mẹ",
   stagesSub: (p, c) => `Thấy ${p}% mê cung · Đã qua ${c}/50`,
-  chapterTitle: n => `Chương ${n}`,
-  chapterRange: (f, l, n) => `Màn ${f}–${l} · ${n}×${n} ô`,
   stageLabel: n => `Màn ${n}`,
   tryNow: "Chơi",
   locked: "Đã khóa",

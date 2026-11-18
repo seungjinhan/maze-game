@@ -31,8 +31,6 @@ export const es: Dict = {
   lockedUntil: prev => `Supera los 50 niveles de ${prev} para abrir`,
   spaceSub: "Laberinto estelar oculto · Rescata a mamá",
   stagesSub: (p, c) => `Se ve ${p}% del laberinto · Superados ${c}/50`,
-  chapterTitle: n => `Capítulo ${n}`,
-  chapterRange: (f, l, n) => `Niveles ${f}–${l} · ${n}×${n} casillas`,
   stageLabel: n => `Nivel ${n}`,
   tryNow: "Jugar",
   locked: "Bloqueado",

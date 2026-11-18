@@ -16,8 +16,7 @@ describe("언어 9개", () => {
         t.introTitle, t.introGo, t.close, t.spaceOpened, t.spaceTitle, t.restart, t.hint, t.arrived, t.time, t.moves,
         t.bestRecord, t.newBest, t.nextStage, t.toSpace, t.meetFamily, t.endingTitle, t.me, t.theEnd, t.toHome,
         ...Object.values(t.admin), ...t.levels, ...t.intro, ...t.ending,
-        t.familyCount(3), t.visible(50), t.lockedUntil(t.levels[0]), t.stagesSub(30, 7), t.chapterTitle(2),
-        t.chapterRange(11, 20, 15), t.stageLabel(4), t.gameTitle(t.levels[1], 9), t.cells(12),
+        t.familyCount(3), t.visible(50), t.lockedUntil(t.levels[0]), t.stagesSub(30, 7), t.stageLabel(4), t.gameTitle(t.levels[1], 9), t.cells(12),
         t.viewNormal(5, 6, 9), t.viewFloored(5, 12),
         ...FAMILY.flatMap(m => [t.members[m], t.memberLines[m], t.rescueGoal(m), t.rescued(m), t.goRescue(m)]),
       ];

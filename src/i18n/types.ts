@@ -23,8 +23,6 @@ export interface Dict {
   lockedUntil(prevLevel: string): string;
   spaceSub: string;
   stagesSub(pct: number, cleared: number): string;
-  chapterTitle(n: number): string;
-  chapterRange(first: number, last: number, size: number): string;
   stageLabel(n: number): string;
   tryNow: string;
   locked: string;

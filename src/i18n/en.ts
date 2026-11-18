@@ -28,8 +28,6 @@ export const en: Dict = {
   lockedUntil: prev => `Clear all 50 ${prev} stages to unlock`,
   spaceSub: "Hidden starlight maze · Rescue Mom",
   stagesSub: (p, c) => `${p}% of the maze visible · Cleared ${c}/50`,
-  chapterTitle: n => `Chapter ${n}`,
-  chapterRange: (f, l, n) => `Stages ${f}–${l} · ${n}×${n}`,
   stageLabel: n => `Stage ${n}`,
   tryNow: "Play",
   locked: "Locked",
