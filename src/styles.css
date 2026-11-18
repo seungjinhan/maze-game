@@ -1,0 +1,151 @@
+/* 토스 미니앱 톤: 회색 바탕 · 흰 카드 · 파란 강조. 미로는 캔버스에 같은 토큰으로 그려요. */
+:root {
+  --bg: #f2f4f6;
+  --paper: #ffffff;
+  --ink: #191f28;
+  --ink-2: #4e5968;
+  --ink-3: #6b7684;
+  --ink-4: #c4cad1;
+  --accent: #3182f6;
+  --accent-weak: #e8f3ff;
+  --on-accent: #ffffff;
+  --scrim: rgba(25, 31, 40, 0.35);
+  /* 미로 캔버스 */
+  --out: #e5e8eb;
+  --floor: #ffffff;
+  --wall: #191f28;
+  --trail: rgba(49, 130, 246, 0.36);
+  --player: #3182f6;
+  --goal: #f04452;
+  --goal-weak: rgba(240, 68, 82, 0.14);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101116; --paper: #1c1d24; --ink: #eceef1; --ink-2: #b5bcc6; --ink-3: #8d96a3; --ink-4: #4a505a;
+    --accent: #3b86f2; --accent-weak: #1d2a40; --on-accent: #ffffff; --scrim: rgba(0, 0, 0, 0.55);
+    --out: #0b0c10; --floor: #24262e; --wall: #e3e7ec; --trail: rgba(92, 160, 250, 0.46);
+    --player: #5aa0ff; --goal: #ff5c69; --goal-weak: rgba(255, 92, 105, 0.2);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+  overscroll-behavior: none;
+}
+button { font: inherit; color: inherit; touch-action: manipulation; cursor: pointer; }
+button:disabled { cursor: default; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, p { margin: 0; }
+ol { list-style: none; margin: 0; padding: 0; }
+.lock { width: 0.8em; height: 0.8em; flex: none; }
+
+.screen {
+  max-width: 480px; height: 100%; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 16px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom) * 0.2);
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+.home, .stages { overflow-y: auto; }
+
+/* ── 홈 ───────────────────────────────────── */
+.home-head { display: flex; flex-direction: column; gap: 6px; padding: 8px 4px 4px; }
+.home-title {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.02em; width: fit-content;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.home-lead { color: var(--ink-2); text-wrap: pretty; }
+.admin-chip {
+  width: fit-content; padding: 3px 8px; border-radius: 6px;
+  background: var(--accent-weak); color: var(--accent); font-size: 12px; font-weight: 700;
+}
+.grade-list { display: flex; flex-direction: column; gap: 10px; }
+.grade-card {
+  width: 100%; border: 0; border-radius: 16px; background: var(--paper); text-align: left;
+  display: grid; grid-template-columns: 44px 1fr auto; grid-template-rows: auto 6px; column-gap: 14px; row-gap: 12px;
+  align-items: center; padding: 16px;
+}
+.grade-card:disabled { color: var(--ink-3); }
+.grade-viz {
+  grid-row: 1; width: 44px; height: 44px; border-radius: 10px; background: var(--out);
+  display: flex; align-items: center; justify-content: center;
+}
+.grade-viz span { background: var(--accent); border-radius: 4px; }
+.grade-card:disabled .grade-viz span { background: var(--ink-4); }
+.grade-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.grade-name { display: inline-flex; align-items: center; gap: 4px; font-size: 18px; font-weight: 700; }
+.grade-sub { font-size: 13px; color: var(--ink-3); }
+.grade-count { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.grade-count small { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.grade-bar { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--bg); overflow: hidden; }
+.grade-bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+
+/* ── 단계 선택 ─────────────────────────────── */
+.stages-head { display: flex; flex-direction: column; gap: 4px; padding: 8px 4px 0; }
+.stages-head h1 { font-size: 26px; font-weight: 800; }
+.stages-head p { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.chapter { display: flex; flex-direction: column; gap: 10px; }
+.chapter h2 { font-size: 16px; font-weight: 700; padding: 0 4px; }
+.chapter h2 small { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 4px; }
+.stage-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.stage-tile {
+  width: 100%; aspect-ratio: 1; border: 0; border-radius: 14px; background: var(--paper);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+}
+.stage-tile:disabled { background: transparent; border: 1px dashed var(--ink-4); color: var(--ink-4); }
+.stage-tile.current { background: var(--accent); color: var(--on-accent); }
+.stage-no { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stage-meta { font-size: 11px; font-weight: 600; min-height: 1.3em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.stage-tile.current .stage-meta { color: var(--on-accent); }
+.stage-tile:disabled .stage-meta { color: var(--ink-4); }
+.sentinel { height: 1px; flex: none; }
+
+/* ── 게임 ─────────────────────────────────── */
+.game { gap: 10px; }
+.hud { display: flex; flex-direction: column; gap: 2px; padding: 0 2px; }
+.hud-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hud-title { font-size: 18px; font-weight: 700; white-space: nowrap; }
+.hud-stats { display: flex; align-items: center; gap: 10px; white-space: nowrap; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ghost { border: 0; border-radius: 8px; padding: 6px 10px; background: var(--paper); color: var(--ink-2); font-size: 13px; font-weight: 600; }
+.hud-view { height: 1.45em; font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.board {
+  flex: 1; min-height: 0; position: relative; border-radius: 16px; overflow: hidden;
+  background: var(--out); touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.board canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.board.bump { animation: bump 160ms ease; }
+@keyframes bump { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) { .board.bump { animation: none; } }
+.hint { text-align: center; font-size: 12px; color: var(--ink-3); text-wrap: balance; }
+
+/* ── 카드 · 창 ─────────────────────────────── */
+.overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--scrim); padding: 16px; }
+.modal {
+  position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; background: var(--scrim);
+  padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right));
+}
+.card { background: var(--paper); border-radius: 20px; padding: 24px 20px 16px; width: min(320px, 100%); text-align: center; display: flex; flex-direction: column; gap: 6px; }
+.card h2 { font-size: 22px; font-weight: 800; }
+.card p { color: var(--ink-2); }
+.card .error { color: var(--goal); font-size: 13px; }
+.card input {
+  width: 100%; margin-top: 10px; padding: 12px; border: 1px solid var(--ink-4); border-radius: 10px;
+  background: var(--bg); color: var(--ink); font: inherit; font-size: 16px;
+}
+.result { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 12px; }
+.result div { display: flex; flex-direction: column-reverse; gap: 2px; }
+.result dt { font-size: 12px; color: var(--ink-3); }
+.result dd { margin: 0; font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.result dd.new-best { color: var(--accent); }
+.actions { display: flex; gap: 8px; margin-top: 10px; }
+.actions button { flex: 1; border: 0; border-radius: 12px; padding: 13px 0; font-weight: 700; }
+.primary { background: var(--accent); color: var(--on-accent); }
+.primary:disabled { opacity: 0.5; }
+.secondary { background: var(--bg); color: var(--ink-2); }

@@ -1,0 +1,7 @@
+node_modules
+dist
+.DS_Store
+# 로컬에만 두는 파일 (공개 저장소에 올리지 않아요)
+ADMIN_PASSWORD.txt
+PLAN.md
+prototype.html

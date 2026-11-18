@@ -1,0 +1,92 @@
+import { useCallback, useEffect, useState } from "react";
+import { GRADES, STAGES } from "./lib/maze";
+import {
+  afterClear,
+  gradeOpen,
+  isBetter,
+  loadProgress,
+  loadRecords,
+  recordKey,
+  saveProgress,
+  saveRecords,
+  stageOpen,
+  type Progress,
+  type Records,
+} from "./lib/progress";
+import { parseHash, toHash, type Route } from "./lib/route";
+import { Game, type ClearResult } from "./screens/Game";
+import { Home } from "./screens/Home";
+import { StageSelect } from "./screens/StageSelect";
+
+export default function App() {
+  const [route, setRoute] = useState<Route>(() => parseHash(location.hash));
+  const [progress, setProgress] = useState<Progress>(loadProgress);
+  const [records, setRecords] = useState<Records>(loadRecords);
+
+  useEffect(() => {
+    const onHash = () => setRoute(parseHash(location.hash));
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  const go = useCallback((r: Route, replace = false) => {
+    if (replace) location.replace(toHash(r));
+    else location.hash = toHash(r);
+    setRoute(r);
+  }, []);
+
+  const updateProgress = useCallback((p: Progress) => {
+    setProgress(p);
+    saveProgress(p);
+  }, []);
+
+  // 잠긴 곳 주소로 들어오면 홈으로 보내요
+  const allowed =
+    route.name === "home" ||
+    (route.name === "stages" ? gradeOpen(progress, route.grade) : stageOpen(progress, route.grade, route.stage));
+  useEffect(() => {
+    if (!allowed) go({ name: "home" }, true);
+  }, [allowed, go]);
+  if (!allowed) return null;
+
+  const onCleared = (grade: number, stage: number, timeMs: number, moves: number): ClearResult => {
+    const { progress: nextProgress, opened } = afterClear(progress, grade, stage);
+    if (nextProgress !== progress) updateProgress(nextProgress);
+    const key = recordKey(grade, stage);
+    const now = { timeMs, moves };
+    const newBest = isBetter(now, records[key]);
+    if (newBest) {
+      const r = { ...records, [key]: now };
+      setRecords(r);
+      saveRecords(r);
+    }
+    return { timeMs, moves, best: newBest ? now : records[key], newBest, opened };
+  };
+
+  if (route.name === "stages") {
+    return (
+      <StageSelect
+        grade={route.grade}
+        progress={progress}
+        records={records}
+        onPlay={stage => go({ name: "play", grade: route.grade, stage })}
+      />
+    );
+  }
+
+  if (route.name === "play") {
+    const { grade, stage } = route;
+    // 다음: 같은 등급 다음 단계, 50단계면 다음 등급 1단계. 다음 판은 뒤로 가기 기록을 쌓지 않아요.
+    const target = stage < STAGES ? { grade, stage: stage + 1 } : grade < GRADES.length - 1 ? { grade: grade + 1, stage: 1 } : null;
+    const next =
+      target && stageOpen(progress, target.grade, target.stage)
+        ? {
+            label: target.grade === grade ? "다음 단계" : `${GRADES[target.grade].name} 시작`,
+            go: () => go({ name: "play", ...target }, true),
+          }
+        : null;
+    return <Game key={`${grade}-${stage}`} grade={grade} stage={stage} onCleared={onCleared} next={next} />;
+  }
+
+  return <Home progress={progress} onOpenGrade={grade => go({ name: "stages", grade })} onProgress={updateProgress} />;
+}
