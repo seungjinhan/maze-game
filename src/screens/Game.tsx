@@ -1,11 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import characterUrl from "../assets/character.jpg";
 import { FamilyFace } from "../components/FamilyFace";
+import { useI18n, type Dict } from "../i18n";
 import { MazeGame } from "../game/engine";
 import { fmtTime } from "../lib/format";
 import { getMaze } from "../lib/maps";
 import { LEVELS, SPACE, STAGES, type Dir } from "../lib/maze";
-import { FAMILY, SPACE_OPENED } from "../lib/story";
+import { FAMILY } from "../lib/story";
 import type { Best } from "../lib/progress";
 import type { View } from "../lib/view";
 
@@ -31,13 +32,14 @@ const KEYS: Record<string, Dir> = {
 };
 const SWIPE_PX = 24;
 
-function viewText(p: number, v: View | null): string {
+function viewText(t: Dict, p: number, v: View | null): string {
   if (!v) return "";
-  if (v.floored) return `보이는 넓이 ${Math.round(p * 100)}% → 최소 3×3칸이라 실제 ${Math.round(v.actual * 100)}%`;
-  return `보이는 넓이 ${Math.round(v.actual * 100)}% · 약 ${Math.round(v.seenCols)}×${Math.round(v.seenRows)}칸 보임`;
+  if (v.floored) return t.viewFloored(Math.round(p * 100), Math.round(v.actual * 100));
+  return t.viewNormal(Math.round(v.actual * 100), Math.round(v.seenCols), Math.round(v.seenRows));
 }
 
 export function Game({ grade, stage, onCleared, next }: Props) {
+  const { t } = useI18n();
   const g = LEVELS[grade];
   const isSpace = grade === SPACE;
   const boxRef = useRef<HTMLDivElement>(null);
@@ -118,9 +120,9 @@ export function Game({ grade, stage, onCleared, next }: Props) {
 
   // 등급의 50단계 · 우주 미로를 깨면 가족 한 명을 구출해요
   const member = isSpace || stage === STAGES ? FAMILY[grade] : null;
-  const headline = member ? `${member.object} 구출했어요!` : "도착!";
-  const subline = member ? `“${member.line}”` : `${g.name} · ${stage}단계`;
-  const title = isSpace ? "우주 · 엄마를 찾아서" : `${g.name} · ${stage}단계`;
+  const headline = member ? t.rescued(member) : t.arrived;
+  const subline = member ? `“${t.memberLines[member]}”` : t.gameTitle(t.levels[grade], stage);
+  const title = isSpace ? t.spaceTitle : t.gameTitle(t.levels[grade], stage);
 
   return (
     <main className="screen game">
@@ -129,12 +131,12 @@ export function Game({ grade, stage, onCleared, next }: Props) {
           <h1 className="hud-title">{title}</h1>
           <div className="hud-stats">
             <span>{fmtTime(timeMs)}</span>
-            <span>{moves}칸</span>
-            <button className="ghost" onClick={restart}>다시 하기</button>
+            <span>{t.cells(moves)}</span>
+            <button className="ghost" onClick={restart}>{t.restart}</button>
           </div>
         </div>
         {/* 한 줄 고정: 줄바꿈되면 미로 높이 ↔ 칸 수 글자가 서로 바뀌며 화면이 떨려요 */}
-        <p className="hud-view">{viewText(g.p, view)}</p>
+        <p className="hud-view">{viewText(t, g.p, view)}</p>
       </div>
 
       <div
@@ -165,30 +167,30 @@ export function Game({ grade, stage, onCleared, next }: Props) {
               {member ? (
                 <div className="rescue-art" aria-hidden="true">
                   <img src={characterUrl} alt="" />
-                  <FamilyFace id={member.id} size={84} />
+                  <FamilyFace id={member} size={84} />
                 </div>
               ) : (
                 <img className="card-art" src={characterUrl} alt="" />
               )}
               <h2 id="clear-title">{headline}</h2>
               <p>{subline}</p>
-              {grade === SPACE - 1 && stage === STAGES && <p className="story-note">{SPACE_OPENED}</p>}
+              {grade === SPACE - 1 && stage === STAGES && <p className="story-note">{t.spaceOpened}</p>}
               <dl className="result">
                 <div>
-                  <dt>시간</dt>
+                  <dt>{t.time}</dt>
                   <dd>{fmtTime(result.timeMs)}</dd>
                 </div>
                 <div>
-                  <dt>이동</dt>
-                  <dd>{result.moves}칸</dd>
+                  <dt>{t.moves}</dt>
+                  <dd>{t.cells(result.moves)}</dd>
                 </div>
                 <div>
-                  <dt>최고 기록</dt>
-                  <dd className={result.newBest ? "new-best" : undefined}>{result.newBest ? "새 기록" : fmtTime(result.best.timeMs)}</dd>
+                  <dt>{t.bestRecord}</dt>
+                  <dd className={result.newBest ? "new-best" : undefined}>{result.newBest ? t.newBest : fmtTime(result.best.timeMs)}</dd>
                 </div>
               </dl>
               <div className="actions">
-                <button className="secondary" onClick={restart}>다시 하기</button>
+                <button className="secondary" onClick={restart}>{t.restart}</button>
                 {next && (
                   <button className="primary" onClick={next.go}>
                     {next.label}
@@ -200,7 +202,7 @@ export function Game({ grade, stage, onCleared, next }: Props) {
         )}
       </div>
 
-      <p className="hint">밀면 모퉁이나 갈림길까지 곧게 가요 · 출발 왼쪽 위, 도착 오른쪽 아래</p>
+      <p className="hint">{t.hint}</p>
     </main>
   );
 }

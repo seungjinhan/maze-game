@@ -34,8 +34,8 @@ describe("미로 251개 (5등급 × 50 + 우주 1)", () => {
     expect(set.size).toBe(GRADES.length * STAGES + 1);
   });
 
-  it("크기: 정사각형. 초보 5 → 10, 중급 10 → 15, 고급 15 → 20, 특급 20 → 25, 신 25 → 30, 우주 50", () => {
-    const ends = [[5, 10], [10, 15], [15, 20], [20, 25], [25, 30]];
+  it("크기: 정사각형, 등급마다 고정. 초보 10, 중급 15, 고급 20, 특급 25, 신 30, 우주 50", () => {
+    const ends = [[10, 10], [15, 15], [20, 20], [25, 25], [30, 30]];
     ends.forEach(([a, b], g) => {
       expect(sizeOf(1, g)).toEqual({ cols: a, rows: a });
       expect(sizeOf(STAGES, g)).toEqual({ cols: b, rows: b });

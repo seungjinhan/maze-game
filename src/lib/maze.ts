@@ -5,13 +5,14 @@ export const STAGES = 50;
 /**
  * 단계 묶음. 0~4 = 등급(50단계씩), 5 = 우주(미로 1개, 신을 끝내면 나타나요).
  * p = 화면에 보이는 미로 넓이 ÷ 전체 넓이. from → to = 1단계 → 50단계 미로 한 변(정사각형).
+ * 지금은 등급마다 50단계 내내 같은 크기예요 (초보 10 · 중급 15 · 고급 20 · 특급 25 · 신 30).
  */
 export const LEVELS = [
-  { name: "초보", p: 1.0, from: 5, to: 10 },
-  { name: "중급", p: 0.5, from: 10, to: 15 },
-  { name: "고급", p: 0.3, from: 15, to: 20 },
-  { name: "특급", p: 0.15, from: 20, to: 25 },
-  { name: "신", p: 0.05, from: 25, to: 30 },
+  { name: "초보", p: 1.0, from: 10, to: 10 },
+  { name: "중급", p: 0.5, from: 15, to: 15 },
+  { name: "고급", p: 0.3, from: 20, to: 20 },
+  { name: "특급", p: 0.15, from: 25, to: 25 },
+  { name: "신", p: 0.05, from: 30, to: 30 },
   { name: "우주", p: 0.05, from: 50, to: 50 },
 ] as const;
 export const SPACE = 5;

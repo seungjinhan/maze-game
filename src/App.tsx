@@ -15,6 +15,7 @@ import {
   type Records,
 } from "./lib/progress";
 import { parseHash, toHash, type Route } from "./lib/route";
+import { useI18n } from "./i18n";
 import { FAMILY } from "./lib/story";
 import { Ending } from "./screens/Ending";
 import { Game, type ClearResult } from "./screens/Game";
@@ -22,6 +23,7 @@ import { Home } from "./screens/Home";
 import { StageSelect } from "./screens/StageSelect";
 
 export default function App() {
+  const { t } = useI18n();
   const [route, setRoute] = useState<Route>(() => parseHash(location.hash));
   const [progress, setProgress] = useState<Progress>(loadProgress);
   const [records, setRecords] = useState<Records>(loadRecords);
@@ -83,7 +85,7 @@ export default function App() {
   if (route.name === "ending") return <Ending onHome={() => go({ name: "home" }, true)} />;
 
   if (route.name === "space") {
-    const next = endingOpen(progress) ? { label: "가족 만나러 가기", go: () => go({ name: "ending" }, true) } : null;
+    const next = endingOpen(progress) ? { label: t.meetFamily, go: () => go({ name: "ending" }, true) } : null;
     return <Game key="space" grade={SPACE} stage={1} onCleared={onCleared} next={next} />;
   }
 
@@ -92,13 +94,13 @@ export default function App() {
     // 다음: 같은 등급 다음 단계 → 다음 등급 1단계 → (신 50단계 다음) 우주. 다음 판은 뒤로 가기 기록을 쌓지 않아요.
     let next: { label: string; go(): void } | null = null;
     if (stage < STAGES) {
-      if (stageOpen(progress, grade, stage + 1)) next = { label: "다음 단계", go: () => go({ name: "play", grade, stage: stage + 1 }, true) };
+      if (stageOpen(progress, grade, stage + 1)) next = { label: t.nextStage, go: () => go({ name: "play", grade, stage: stage + 1 }, true) };
     } else if (grade < GRADES.length - 1) {
       if (stageOpen(progress, grade + 1, 1)) {
-        next = { label: `${FAMILY[grade + 1].object} 구하러 가기`, go: () => go({ name: "play", grade: grade + 1, stage: 1 }, true) };
+        next = { label: t.goRescue(FAMILY[grade + 1]), go: () => go({ name: "play", grade: grade + 1, stage: 1 }, true) };
       }
     } else if (stageOpen(progress, SPACE, 1)) {
-      next = { label: "우주로 가기", go: () => go({ name: "space" }, true) };
+      next = { label: t.toSpace, go: () => go({ name: "space" }, true) };
     }
     return <Game key={`${grade}-${stage}`} grade={grade} stage={stage} onCleared={onCleared} next={next} />;
   }

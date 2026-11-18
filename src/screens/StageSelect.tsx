@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import faceUrl from "../assets/face.jpg";
 import { LockIcon } from "../components/LockIcon";
+import { useI18n } from "../i18n";
 import { fmtTime } from "../lib/format";
 import { GRADES, sizeOf, STAGES } from "../lib/maze";
 import { clearedInGrade, indexOf, recordKey, stageOpen, type Progress, type Records } from "../lib/progress";
@@ -18,6 +19,7 @@ interface Props {
 /** 챕터(10단계)씩 스크롤로 이어서 보여줘요 */
 export function StageSelect({ grade, progress, records, onPlay }: Props) {
   const g = GRADES[grade];
+  const { t } = useI18n();
   const [shown, setShown] = useState(1);
   const sentinel = useRef<HTMLDivElement>(null);
 
@@ -36,20 +38,18 @@ export function StageSelect({ grade, progress, records, onPlay }: Props) {
       <header className="stages-head">
         <h1>
           <img className="avatar" src={faceUrl} alt="" />
-          {g.name}
+          {t.levels[grade]}
         </h1>
-        <p>
-          미로의 {Math.round(g.p * 100)}%가 보여요 · 깬 단계 {clearedInGrade(progress, grade)}/{STAGES}
-        </p>
+        <p>{t.stagesSub(Math.round(g.p * 100), clearedInGrade(progress, grade))}</p>
       </header>
 
       {Array.from({ length: shown }, (_, ch) => {
         const first = ch * PER_CHAPTER + 1, last = first + PER_CHAPTER - 1;
-        const a = sizeOf(first, grade), b = sizeOf(last, grade);
+        const size = sizeOf(first, grade).cols;
         return (
           <section key={ch} className="chapter">
             <h2>
-              {ch + 1}챕터 <small>{first}~{last}단계 · {a.cols}×{a.rows} → {b.cols}×{b.rows}칸</small>
+              {t.chapterTitle(ch + 1)} <small>{t.chapterRange(first, last, size)}</small>
             </h2>
             <ol className="stage-grid">
               {Array.from({ length: PER_CHAPTER }, (_, k) => {
@@ -63,10 +63,10 @@ export function StageSelect({ grade, progress, records, onPlay }: Props) {
                       className={`stage-tile${current ? " current" : ""}${best ? " cleared" : ""}`}
                       disabled={!open}
                       onClick={() => onPlay(stage)}
-                      aria-label={`${stage}단계${open ? (best ? `, 최고 ${fmtTime(best.timeMs)}` : "") : ", 잠김"}`}
+                      aria-label={`${t.stageLabel(stage)}${open ? (best ? `, ${t.bestRecord} ${fmtTime(best.timeMs)}` : "") : `, ${t.locked}`}`}
                     >
                       <span className="stage-no">{stage}</span>
-                      <span className="stage-meta">{!open ? <LockIcon /> : best ? fmtTime(best.timeMs) : current ? "도전" : ""}</span>
+                      <span className="stage-meta">{!open ? <LockIcon /> : best ? fmtTime(best.timeMs) : current ? t.tryNow : ""}</span>
                     </button>
                   </li>
                 );
