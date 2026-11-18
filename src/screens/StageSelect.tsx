@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import faceUrl from "../assets/face.jpg";
 import { LockIcon } from "../components/LockIcon";
 import { fmtTime } from "../lib/format";
 import { GRADES, sizeOf, STAGES } from "../lib/maze";
@@ -33,7 +34,10 @@ export function StageSelect({ grade, progress, records, onPlay }: Props) {
   return (
     <main className="screen stages">
       <header className="stages-head">
-        <h1>{g.name}</h1>
+        <h1>
+          <img className="avatar" src={faceUrl} alt="" />
+          {g.name}
+        </h1>
         <p>
           미로의 {Math.round(g.p * 100)}%가 보여요 · 깬 단계 {clearedInGrade(progress, grade)}/{STAGES}
         </p>

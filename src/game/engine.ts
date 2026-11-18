@@ -1,9 +1,10 @@
 import { canGo, DIRS, type Dir, type Maze } from "../lib/maze";
 import { continueStraight } from "../lib/move";
 import { camAxis, viewFor, type View } from "../lib/view";
+import faceUrl from "../assets/face.jpg";
 
 const STEP_MS = 55; // 한 칸 이동 시간
-export const TRAIL_FADE_MS = 8000; // 지나온 길이 다 사라지는 시간
+export const TRAIL_FADE_MS = 1000; // 지나온 길이 다 사라지는 시간 (1초)
 
 const TOKENS = {
   out: "--out",
@@ -23,7 +24,7 @@ export interface GameEvents {
   onView(view: View): void;
 }
 
-/** 미로 한 판: 그리기 · 카메라 · 직선 자동 이동 · 타이머 · 서서히 사라지는 지나온 길 */
+/** 미로 한 판: 그리기 · 카메라 · 직선 자동 이동 · 타이머 · 1초 안에 사라지는 발자국 */
 export class MazeGame {
   private ctx: CanvasRenderingContext2D;
   private colors = {} as Colors;
@@ -47,6 +48,7 @@ export class MazeGame {
   private running = false;
   private done = false;
   private raf = 0;
+  private face = new Image();
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -57,6 +59,8 @@ export class MazeGame {
     this.ctx = canvas.getContext("2d")!;
     this.visitedAt = new Float64Array(maze.cols * maze.rows);
     this.readColors();
+    this.face.onload = () => this.draw();
+    this.face.src = faceUrl;
     this.reset();
   }
 
@@ -209,17 +213,21 @@ export class MazeGame {
     ctx.fillStyle = C.goalWeak;
     ctx.fillRect((cols - 1) * c, (rows - 1) * c, c, c);
 
-    // 지나온 길: 지난 지 오래될수록 옅어지다 사라져요
+    // 지나온 길: 고양이 발자국. 1초 안에 옅어지다 사라져요
     ctx.fillStyle = C.trail;
-    const r = Math.max(1.5, c * 0.13);
     for (let y = y0; y <= y1; y++) {
       for (let x = x0; x <= x1; x++) {
         const at = this.visitedAt[y * cols + x];
         const age = now - at;
         if (!at || age >= TRAIL_FADE_MS) continue;
         ctx.globalAlpha = 1 - Math.max(0, age) / TRAIL_FADE_MS;
+        const cx = (x + 0.5) * c, cy = (y + 0.5) * c;
         ctx.beginPath();
-        ctx.arc((x + 0.5) * c, (y + 0.5) * c, r, 0, Math.PI * 2);
+        ctx.ellipse(cx, cy + c * 0.06, c * 0.13, c * 0.11, 0, 0, Math.PI * 2);
+        for (const [tx, ty] of [[-0.13, -0.09], [0, -0.15], [0.13, -0.09]]) {
+          ctx.moveTo(cx + tx * c + c * 0.055, cy + ty * c);
+          ctx.arc(cx + tx * c, cy + ty * c, c * 0.055, 0, Math.PI * 2);
+        }
         ctx.fill();
       }
     }
@@ -241,26 +249,34 @@ export class MazeGame {
     }
     ctx.stroke();
 
-    // 도착 깃발
+    // 도착: 기타 피크
     const gx = (cols - 1) * c, gy = (rows - 1) * c;
-    ctx.strokeStyle = C.goal;
+    const at = (fx: number, fy: number): [number, number] => [gx + fx * c, gy + fy * c];
     ctx.fillStyle = C.goal;
-    ctx.lineWidth = Math.max(1.2, c * 0.06);
     ctx.beginPath();
-    ctx.moveTo(gx + c * 0.36, gy + c * 0.24);
-    ctx.lineTo(gx + c * 0.36, gy + c * 0.78);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(gx + c * 0.36, gy + c * 0.24);
-    ctx.lineTo(gx + c * 0.72, gy + c * 0.36);
-    ctx.lineTo(gx + c * 0.36, gy + c * 0.5);
-    ctx.closePath();
+    ctx.moveTo(...at(0.5, 0.2));
+    ctx.quadraticCurveTo(...at(0.86, 0.18), ...at(0.8, 0.42));
+    ctx.quadraticCurveTo(...at(0.66, 0.74), ...at(0.5, 0.84));
+    ctx.quadraticCurveTo(...at(0.34, 0.74), ...at(0.2, 0.42));
+    ctx.quadraticCurveTo(...at(0.14, 0.18), ...at(0.5, 0.2));
     ctx.fill();
 
-    // 플레이어
-    ctx.fillStyle = C.player;
+    // 플레이어: 캐릭터 얼굴 + 보라 테두리
+    const px = (this.rx + 0.5) * c, py = (this.ry + 0.5) * c, pr = c * 0.42;
+    ctx.save();
     ctx.beginPath();
-    ctx.arc((this.rx + 0.5) * c, (this.ry + 0.5) * c, c * 0.3, 0, Math.PI * 2);
+    ctx.arc(px, py, pr, 0, Math.PI * 2);
+    ctx.fillStyle = C.player;
     ctx.fill();
+    if (this.face.complete && this.face.naturalWidth) {
+      ctx.clip();
+      ctx.drawImage(this.face, px - pr, py - pr, pr * 2, pr * 2);
+    }
+    ctx.restore();
+    ctx.strokeStyle = C.player;
+    ctx.lineWidth = Math.max(1.5, c * 0.07);
+    ctx.beginPath();
+    ctx.arc(px, py, pr, 0, Math.PI * 2);
+    ctx.stroke();
   }
 }

@@ -29,9 +29,9 @@ export interface Maze {
   walls: Uint8Array;
 }
 
-/** 2단계마다 가로 1칸, 세로 = 가로 × 4/3. 1단계 5×7 → 50단계 29×39 */
+/** 가로는 1단계 11칸 → 50단계 29칸으로 고르게 늘고, 세로 = 가로 × 4/3. 1단계 11×15 → 50단계 29×39 */
 export function sizeOf(stage: number): { cols: number; rows: number } {
-  const cols = 5 + Math.floor((stage - 1) / 2);
+  const cols = 11 + Math.floor(((stage - 1) * 18) / (STAGES - 1));
   return { cols, rows: Math.round((cols * 4) / 3) };
 }
 
@@ -98,16 +98,20 @@ export function solve(m: Maze): { length: number; reached: number } {
   return { length: dist[cols * rows - 1], reached: q.length };
 }
 
-/** 등급마다 다른 미로 50개. 같은 크기 두 단계 중 정답이 긴 쪽을 뒤 단계에 둬요. 결과: [등급][단계 − 1] */
+/** 등급마다 다른 미로 50개. 크기가 같은 단계끼리는 정답이 긴 미로를 뒤 단계에 둬요. 결과: [등급][단계 − 1] */
 export function buildAllMazes(): Maze[][] {
   return GRADES.map((_, g) => {
     const list: Maze[] = [];
-    for (let pair = 0; pair < STAGES / 2; pair++) {
-      const { cols, rows } = sizeOf(pair * 2 + 1);
-      const twins = [0, 1]
-        .map(k => generate(cols, rows, ((g + 1) * 1000003 + pair * 7919 + k * 104729 + 12345) >>> 0))
-        .sort((a, b) => solve(a).length - solve(b).length);
-      list.push(...twins);
+    let stage = 1;
+    while (stage <= STAGES) {
+      const { cols, rows } = sizeOf(stage);
+      let count = 0;
+      while (stage + count <= STAGES && sizeOf(stage + count).cols === cols) count++;
+      const group = Array.from({ length: count }, (_, k) =>
+        generate(cols, rows, ((g + 1) * 1000003 + stage * 7919 + k * 104729 + 12345) >>> 0),
+      ).sort((a, b) => solve(a).length - solve(b).length);
+      list.push(...group);
+      stage += count;
     }
     return list;
   });

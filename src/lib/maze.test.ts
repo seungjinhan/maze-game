@@ -24,7 +24,7 @@ describe("미로 250개", () => {
           expect(m.walls[y * m.cols] & W).toBe(W);
           expect(m.walls[y * m.cols + m.cols - 1] & E).toBe(E);
         }
-        if (s % 2 === 0) expect(solve(getMaze(g, s - 1)).length).toBeLessThanOrEqual(r.length);
+        if (s > 1 && sizeOf(s - 1).cols === m.cols) expect(solve(getMaze(g, s - 1)).length).toBeLessThanOrEqual(r.length);
       }
     }
   });
@@ -34,8 +34,9 @@ describe("미로 250개", () => {
     expect(set.size).toBe(GRADES.length * STAGES);
   });
 
-  it("크기: 1단계 5×7, 50단계 29×39", () => {
-    expect(sizeOf(1)).toEqual({ cols: 5, rows: 7 });
+  it("크기: 1단계 11×15, 50단계 29×39, 줄지 않아요", () => {
+    for (let s = 2; s <= STAGES; s++) expect(sizeOf(s).cols).toBeGreaterThanOrEqual(sizeOf(s - 1).cols);
+    expect(sizeOf(1)).toEqual({ cols: 11, rows: 15 });
     expect(sizeOf(50)).toEqual({ cols: 29, rows: 39 });
   });
 });

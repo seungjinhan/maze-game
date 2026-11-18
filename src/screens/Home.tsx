@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import characterUrl from "../assets/character.jpg";
 import { AdminDialog } from "../components/AdminDialog";
 import { LockIcon } from "../components/LockIcon";
 import { GRADES, STAGES } from "../lib/maze";
@@ -24,6 +25,7 @@ export function Home({ progress, onOpenGrade, onProgress }: Props) {
   return (
     <main className="screen home">
       <header className="home-head">
+        <img className="hero-art" src={characterUrl} alt="헤드폰을 쓰고 기타를 치는 검은 고양이 캐릭터" />
         {/* 제목을 길게 누르면 관리자 창이 열려요 (테스트용, 화면에는 표시하지 않아요) */}
         <h1
           className="home-title"

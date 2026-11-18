@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import characterUrl from "../assets/character.jpg";
 import { MazeGame } from "../game/engine";
 import { fmtTime } from "../lib/format";
 import { getMaze } from "../lib/maps";
@@ -153,6 +154,7 @@ export function Game({ grade, stage, onCleared, next }: Props) {
         {result && (
           <div className="overlay">
             <div className="card" role="dialog" aria-labelledby="clear-title">
+              <img className="card-art" src={characterUrl} alt="" />
               <h2 id="clear-title">{headline}</h2>
               <p>{subline}</p>
               <dl className="result">
