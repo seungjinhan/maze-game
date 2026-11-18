@@ -2,13 +2,16 @@
 
 export const STAGES = 50;
 
-/** 등급 = 시야. p = 화면에 보이는 미로 넓이 ÷ 전체 넓이 */
+/**
+ * 등급 = 시야. p = 화면에 보이는 미로 넓이 ÷ 전체 넓이.
+ * area = 기본 크기 대비 미로 넓이. 초보는 미로 전체가 보여서 넓이를 40%로 줄였어요.
+ */
 export const GRADES = [
-  { name: "초보", p: 1.0 },
-  { name: "중급", p: 0.5 },
-  { name: "고급", p: 0.3 },
-  { name: "특급", p: 0.15 },
-  { name: "신", p: 0.05 },
+  { name: "초보", p: 1.0, area: 0.4 },
+  { name: "중급", p: 0.5, area: 1 },
+  { name: "고급", p: 0.3, area: 1 },
+  { name: "특급", p: 0.15, area: 1 },
+  { name: "신", p: 0.05, area: 1 },
 ] as const;
 
 export const N = 1, E = 2, S = 4, W = 8;
@@ -29,9 +32,13 @@ export interface Maze {
   walls: Uint8Array;
 }
 
-/** 가로는 1단계 11칸 → 50단계 29칸으로 고르게 늘고, 세로 = 가로 × 4/3. 1단계 11×15 → 50단계 29×39 */
-export function sizeOf(stage: number): { cols: number; rows: number } {
-  const cols = 11 + Math.floor(((stage - 1) * 18) / (STAGES - 1));
+/**
+ * 기본 크기: 가로가 1단계 11칸 → 50단계 29칸으로 고르게 늘고, 세로 = 가로 × 4/3.
+ * 등급의 area만큼 넓이를 줄여요 (초보: 1단계 7×9 → 50단계 18×24, 나머지: 11×15 → 29×39).
+ */
+export function sizeOf(stage: number, grade: number): { cols: number; rows: number } {
+  const base = 11 + Math.floor(((stage - 1) * 18) / (STAGES - 1));
+  const cols = Math.round(base * Math.sqrt(GRADES[grade].area));
   return { cols, rows: Math.round((cols * 4) / 3) };
 }
 
@@ -104,9 +111,9 @@ export function buildAllMazes(): Maze[][] {
     const list: Maze[] = [];
     let stage = 1;
     while (stage <= STAGES) {
-      const { cols, rows } = sizeOf(stage);
+      const { cols, rows } = sizeOf(stage, g);
       let count = 0;
-      while (stage + count <= STAGES && sizeOf(stage + count).cols === cols) count++;
+      while (stage + count <= STAGES && sizeOf(stage + count, g).cols === cols) count++;
       const group = Array.from({ length: count }, (_, k) =>
         generate(cols, rows, ((g + 1) * 1000003 + stage * 7919 + k * 104729 + 12345) >>> 0),
       ).sort((a, b) => solve(a).length - solve(b).length);

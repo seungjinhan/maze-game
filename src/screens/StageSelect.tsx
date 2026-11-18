@@ -45,7 +45,7 @@ export function StageSelect({ grade, progress, records, onPlay }: Props) {
 
       {Array.from({ length: shown }, (_, ch) => {
         const first = ch * PER_CHAPTER + 1, last = first + PER_CHAPTER - 1;
-        const a = sizeOf(first), b = sizeOf(last);
+        const a = sizeOf(first, grade), b = sizeOf(last, grade);
         return (
           <section key={ch} className="chapter">
             <h2>

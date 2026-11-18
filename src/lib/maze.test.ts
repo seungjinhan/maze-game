@@ -13,7 +13,7 @@ describe("미로 250개", () => {
     for (let g = 0; g < GRADES.length; g++) {
       for (let s = 1; s <= STAGES; s++) {
         const m = getMaze(g, s);
-        expect({ cols: m.cols, rows: m.rows }).toEqual(sizeOf(s));
+        expect({ cols: m.cols, rows: m.rows }).toEqual(sizeOf(s, g));
         const r = solve(m);
         expect(r.reached).toBe(m.cols * m.rows);
         for (let x = 0; x < m.cols; x++) {
@@ -24,7 +24,7 @@ describe("미로 250개", () => {
           expect(m.walls[y * m.cols] & W).toBe(W);
           expect(m.walls[y * m.cols + m.cols - 1] & E).toBe(E);
         }
-        if (s > 1 && sizeOf(s - 1).cols === m.cols) expect(solve(getMaze(g, s - 1)).length).toBeLessThanOrEqual(r.length);
+        if (s > 1 && sizeOf(s - 1, g).cols === m.cols) expect(solve(getMaze(g, s - 1)).length).toBeLessThanOrEqual(r.length);
       }
     }
   });
@@ -34,9 +34,13 @@ describe("미로 250개", () => {
     expect(set.size).toBe(GRADES.length * STAGES);
   });
 
-  it("크기: 1단계 11×15, 50단계 29×39, 줄지 않아요", () => {
-    for (let s = 2; s <= STAGES; s++) expect(sizeOf(s).cols).toBeGreaterThanOrEqual(sizeOf(s - 1).cols);
-    expect(sizeOf(1)).toEqual({ cols: 11, rows: 15 });
-    expect(sizeOf(50)).toEqual({ cols: 29, rows: 39 });
+  it("크기: 초보 7×9 → 18×24, 나머지 11×15 → 29×39, 단계마다 줄지 않아요", () => {
+    for (let g = 0; g < GRADES.length; g++) {
+      for (let s = 2; s <= STAGES; s++) expect(sizeOf(s, g).cols).toBeGreaterThanOrEqual(sizeOf(s - 1, g).cols);
+    }
+    expect(sizeOf(1, 0)).toEqual({ cols: 7, rows: 9 });
+    expect(sizeOf(50, 0)).toEqual({ cols: 18, rows: 24 });
+    expect(sizeOf(1, 1)).toEqual({ cols: 11, rows: 15 });
+    expect(sizeOf(50, 4)).toEqual({ cols: 29, rows: 39 });
   });
 });

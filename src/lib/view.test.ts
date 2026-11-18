@@ -5,9 +5,9 @@ import { camAxis, MIN_VIEW, viewFor } from "./view";
 describe("시야", () => {
   for (const [w, h] of [[343, 560], [358, 640], [398, 700], [448, 520]]) {
     it(`${w}×${h}: 보이는 넓이 = p, 아니면 최소 3×3칸`, () => {
-      for (const g of GRADES) {
+      for (const [gi, g] of GRADES.entries()) {
         for (let s = 1; s <= STAGES; s++) {
-          const { cols, rows } = sizeOf(s);
+          const { cols, rows } = sizeOf(s, gi);
           const v = viewFor(w, h, cols, rows, g.p);
           if (v.floored) {
             expect(Math.min(v.seenCols, v.seenRows)).toBeGreaterThanOrEqual(MIN_VIEW - 1e-9);
