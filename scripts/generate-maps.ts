@@ -1,4 +1,4 @@
-// 미로 250개(5등급 × 50단계)를 만들어 src/data/maps.json에 저장해요.
+// 미로 251개(5등급 × 50단계 + 우주 1개)를 만들어 src/data/maps.json에 저장해요.
 // 고정 시드라 몇 번을 돌려도 같은 미로가 나와요. 실행: npm run maps
 import { writeFileSync } from "node:fs";
 import { buildAllMazes, encodeWalls, solve } from "../src/lib/maze.ts";

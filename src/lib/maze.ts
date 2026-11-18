@@ -3,16 +3,21 @@
 export const STAGES = 50;
 
 /**
- * 등급 = 시야. p = 화면에 보이는 미로 넓이 ÷ 전체 넓이.
- * area = 기본 크기 대비 미로 넓이. 초보는 미로 전체가 보여서 넓이를 40%로 줄였어요.
+ * 단계 묶음. 0~4 = 등급(50단계씩), 5 = 우주(미로 1개, 신을 끝내면 나타나요).
+ * p = 화면에 보이는 미로 넓이 ÷ 전체 넓이. from → to = 1단계 → 50단계 미로 한 변(정사각형).
  */
-export const GRADES = [
-  { name: "초보", p: 1.0, area: 0.4 },
-  { name: "중급", p: 0.5, area: 1 },
-  { name: "고급", p: 0.3, area: 1 },
-  { name: "특급", p: 0.15, area: 1 },
-  { name: "신", p: 0.05, area: 1 },
+export const LEVELS = [
+  { name: "초보", p: 1.0, from: 5, to: 10 },
+  { name: "중급", p: 0.5, from: 10, to: 15 },
+  { name: "고급", p: 0.3, from: 15, to: 20 },
+  { name: "특급", p: 0.15, from: 20, to: 25 },
+  { name: "신", p: 0.05, from: 25, to: 30 },
+  { name: "우주", p: 0.05, from: 50, to: 50 },
 ] as const;
+export const SPACE = 5;
+/** 차례로 여는 등급 5개 (우주 제외) */
+export const GRADES = LEVELS.slice(0, SPACE);
+export const stagesOf = (level: number) => (level === SPACE ? 1 : STAGES);
 
 export const N = 1, E = 2, S = 4, W = 8;
 
@@ -32,14 +37,11 @@ export interface Maze {
   walls: Uint8Array;
 }
 
-/**
- * 기본 크기: 가로가 1단계 11칸 → 50단계 29칸으로 고르게 늘고, 세로 = 가로 × 4/3.
- * 등급의 area만큼 넓이를 줄여요 (초보: 1단계 7×9 → 50단계 18×24, 나머지: 11×15 → 29×39).
- */
-export function sizeOf(stage: number, grade: number): { cols: number; rows: number } {
-  const base = 11 + Math.floor(((stage - 1) * 18) / (STAGES - 1));
-  const cols = Math.round(base * Math.sqrt(GRADES[grade].area));
-  return { cols, rows: Math.round((cols * 4) / 3) };
+/** 정사각형 미로. 한 변이 1단계 from → 50단계 to로 고르게 늘어요. */
+export function sizeOf(stage: number, level: number): { cols: number; rows: number } {
+  const { from, to } = LEVELS[level];
+  const n = from + Math.floor(((stage - 1) * (to - from)) / (STAGES - 1));
+  return { cols: n, rows: n };
 }
 
 export function canGo(m: Maze, x: number, y: number, dir: Dir): boolean {
@@ -105,15 +107,19 @@ export function solve(m: Maze): { length: number; reached: number } {
   return { length: dist[cols * rows - 1], reached: q.length };
 }
 
-/** 등급마다 다른 미로 50개. 크기가 같은 단계끼리는 정답이 긴 미로를 뒤 단계에 둬요. 결과: [등급][단계 − 1] */
+/**
+ * 등급마다 다른 미로 50개 + 우주 미로 1개. 크기가 같은 단계끼리는 정답이 긴 미로를 뒤 단계에 둬요.
+ * 결과: [단계 묶음][단계 − 1]
+ */
 export function buildAllMazes(): Maze[][] {
-  return GRADES.map((_, g) => {
+  return LEVELS.map((_, g) => {
     const list: Maze[] = [];
+    const last = stagesOf(g);
     let stage = 1;
-    while (stage <= STAGES) {
+    while (stage <= last) {
       const { cols, rows } = sizeOf(stage, g);
       let count = 0;
-      while (stage + count <= STAGES && sizeOf(stage + count, g).cols === cols) count++;
+      while (stage + count <= last && sizeOf(stage + count, g).cols === cols) count++;
       const group = Array.from({ length: count }, (_, k) =>
         generate(cols, rows, ((g + 1) * 1000003 + stage * 7919 + k * 104729 + 12345) >>> 0),
       ).sort((a, b) => solve(a).length - solve(b).length);

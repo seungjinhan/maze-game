@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import characterUrl from "../assets/character.jpg";
+import { FamilyFace } from "../components/FamilyFace";
 import { MazeGame } from "../game/engine";
 import { fmtTime } from "../lib/format";
 import { getMaze } from "../lib/maps";
-import { GRADES, STAGES, type Dir } from "../lib/maze";
+import { LEVELS, SPACE, STAGES, type Dir } from "../lib/maze";
+import { FAMILY, SPACE_OPENED } from "../lib/story";
 import type { Best } from "../lib/progress";
 import type { View } from "../lib/view";
 
@@ -36,7 +38,8 @@ function viewText(p: number, v: View | null): string {
 }
 
 export function Game({ grade, stage, onCleared, next }: Props) {
-  const g = GRADES[grade];
+  const g = LEVELS[grade];
+  const isSpace = grade === SPACE;
   const boxRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<MazeGame | null>(null);
@@ -49,6 +52,12 @@ export function Game({ grade, stage, onCleared, next }: Props) {
   const [view, setView] = useState<View | null>(null);
   const [result, setResult] = useState<ClearResult | null>(null);
 
+  // 우주 미로는 밤하늘 색으로 (미로를 만들기 전에 색을 바꿔야 캔버스가 새 색을 읽어요)
+  useLayoutEffect(() => {
+    document.documentElement.classList.toggle("space", isSpace);
+    return () => document.documentElement.classList.remove("space");
+  }, [isSpace]);
+
   useEffect(() => {
     const box = boxRef.current!;
     const bump = () => {
@@ -56,7 +65,7 @@ export function Game({ grade, stage, onCleared, next }: Props) {
       void box.offsetWidth;
       box.classList.add("bump");
     };
-    const game = new MazeGame(canvasRef.current!, getMaze(grade, stage), GRADES[grade].p, {
+    const game = new MazeGame(canvasRef.current!, getMaze(grade, stage), LEVELS[grade].p, {
       onStep: setMoves,
       onView: setView,
       onBump: bump,
@@ -107,18 +116,17 @@ export function Game({ grade, stage, onCleared, next }: Props) {
     setResult(null);
   };
 
-  const finalClear = grade === GRADES.length - 1 && stage === STAGES;
-  const gradeDone = stage === STAGES && !finalClear && result?.opened;
-  const headline = finalClear ? "모든 단계를 깼어요" : gradeDone ? `${GRADES[grade + 1].name}이 열렸어요` : "도착!";
-  const subline = finalClear ? "신 50단계까지 끝냈어요" : gradeDone ? `${g.name} 50단계를 모두 깼어요` : `${g.name} · ${stage}단계`;
+  // 등급의 50단계 · 우주 미로를 깨면 가족 한 명을 구출해요
+  const member = isSpace || stage === STAGES ? FAMILY[grade] : null;
+  const headline = member ? `${member.object} 구출했어요!` : "도착!";
+  const subline = member ? `“${member.line}”` : `${g.name} · ${stage}단계`;
+  const title = isSpace ? "우주 · 엄마를 찾아서" : `${g.name} · ${stage}단계`;
 
   return (
     <main className="screen game">
       <div className="hud">
         <div className="hud-top">
-          <h1 className="hud-title">
-            {g.name} · {stage}단계
-          </h1>
+          <h1 className="hud-title">{title}</h1>
           <div className="hud-stats">
             <span>{fmtTime(timeMs)}</span>
             <span>{moves}칸</span>
@@ -154,9 +162,17 @@ export function Game({ grade, stage, onCleared, next }: Props) {
         {result && (
           <div className="overlay">
             <div className="card" role="dialog" aria-labelledby="clear-title">
-              <img className="card-art" src={characterUrl} alt="" />
+              {member ? (
+                <div className="rescue-art" aria-hidden="true">
+                  <img src={characterUrl} alt="" />
+                  <FamilyFace id={member.id} size={84} />
+                </div>
+              ) : (
+                <img className="card-art" src={characterUrl} alt="" />
+              )}
               <h2 id="clear-title">{headline}</h2>
               <p>{subline}</p>
+              {grade === SPACE - 1 && stage === STAGES && <p className="story-note">{SPACE_OPENED}</p>}
               <dl className="result">
                 <div>
                   <dt>시간</dt>

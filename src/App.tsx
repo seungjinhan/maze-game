@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { GRADES, STAGES } from "./lib/maze";
+import { GRADES, SPACE, STAGES } from "./lib/maze";
 import {
   afterClear,
+  endingOpen,
   gradeOpen,
   isBetter,
   loadProgress,
@@ -14,6 +15,8 @@ import {
   type Records,
 } from "./lib/progress";
 import { parseHash, toHash, type Route } from "./lib/route";
+import { FAMILY } from "./lib/story";
+import { Ending } from "./screens/Ending";
 import { Game, type ClearResult } from "./screens/Game";
 import { Home } from "./screens/Home";
 import { StageSelect } from "./screens/StageSelect";
@@ -43,7 +46,10 @@ export default function App() {
   // 잠긴 곳 주소로 들어오면 홈으로 보내요
   const allowed =
     route.name === "home" ||
-    (route.name === "stages" ? gradeOpen(progress, route.grade) : stageOpen(progress, route.grade, route.stage));
+    (route.name === "stages" && gradeOpen(progress, route.grade)) ||
+    (route.name === "play" && stageOpen(progress, route.grade, route.stage)) ||
+    (route.name === "space" && stageOpen(progress, SPACE, 1)) ||
+    (route.name === "ending" && endingOpen(progress));
   useEffect(() => {
     if (!allowed) go({ name: "home" }, true);
   }, [allowed, go]);
@@ -74,19 +80,36 @@ export default function App() {
     );
   }
 
+  if (route.name === "ending") return <Ending onHome={() => go({ name: "home" }, true)} />;
+
+  if (route.name === "space") {
+    const next = endingOpen(progress) ? { label: "가족 만나러 가기", go: () => go({ name: "ending" }, true) } : null;
+    return <Game key="space" grade={SPACE} stage={1} onCleared={onCleared} next={next} />;
+  }
+
   if (route.name === "play") {
     const { grade, stage } = route;
-    // 다음: 같은 등급 다음 단계, 50단계면 다음 등급 1단계. 다음 판은 뒤로 가기 기록을 쌓지 않아요.
-    const target = stage < STAGES ? { grade, stage: stage + 1 } : grade < GRADES.length - 1 ? { grade: grade + 1, stage: 1 } : null;
-    const next =
-      target && stageOpen(progress, target.grade, target.stage)
-        ? {
-            label: target.grade === grade ? "다음 단계" : `${GRADES[target.grade].name} 시작`,
-            go: () => go({ name: "play", ...target }, true),
-          }
-        : null;
+    // 다음: 같은 등급 다음 단계 → 다음 등급 1단계 → (신 50단계 다음) 우주. 다음 판은 뒤로 가기 기록을 쌓지 않아요.
+    let next: { label: string; go(): void } | null = null;
+    if (stage < STAGES) {
+      if (stageOpen(progress, grade, stage + 1)) next = { label: "다음 단계", go: () => go({ name: "play", grade, stage: stage + 1 }, true) };
+    } else if (grade < GRADES.length - 1) {
+      if (stageOpen(progress, grade + 1, 1)) {
+        next = { label: `${FAMILY[grade + 1].object} 구하러 가기`, go: () => go({ name: "play", grade: grade + 1, stage: 1 }, true) };
+      }
+    } else if (stageOpen(progress, SPACE, 1)) {
+      next = { label: "우주로 가기", go: () => go({ name: "space" }, true) };
+    }
     return <Game key={`${grade}-${stage}`} grade={grade} stage={stage} onCleared={onCleared} next={next} />;
   }
 
-  return <Home progress={progress} onOpenGrade={grade => go({ name: "stages", grade })} onProgress={updateProgress} />;
+  return (
+    <Home
+      progress={progress}
+      onOpenGrade={grade => go({ name: "stages", grade })}
+      onOpenSpace={() => go({ name: "space" })}
+      onOpenEnding={() => go({ name: "ending" })}
+      onProgress={updateProgress}
+    />
+  );
 }

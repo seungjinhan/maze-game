@@ -32,6 +32,15 @@
   }
 }
 
+/* 우주 미로 · 엔딩: 밤하늘 (밝은 · 어두운 화면 모두 같은 색) */
+:root.space {
+  --bg: #0b0c1d; --paper: #171a33; --ink: #f1eefc; --ink-2: #c9c4e6; --ink-3: #9a95c0; --ink-4: #3c3f66;
+  --accent: #ffd166; --accent-weak: #2a2a4a; --on-accent: #1a1530; --scrim: rgba(0, 0, 0, 0.6);
+  --out: #05060f; --floor: #141735; --wall: #c9d2ff; --trail: rgba(255, 209, 102, 0.75);
+  --player: #ffd166; --goal: #ff8fb1; --goal-weak: rgba(255, 143, 177, 0.25);
+  color-scheme: dark;
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body, #root { height: 100%; margin: 0; }
 body {
@@ -154,3 +163,50 @@ ol { list-style: none; margin: 0; padding: 0; }
 .primary { background: var(--accent); color: var(--on-accent); }
 .primary:disabled { opacity: 0.5; }
 .secondary { background: var(--bg); color: var(--ink-2); }
+
+/* ── 이야기 · 가족 ─────────────────────────── */
+.link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.family { background: var(--paper); border-radius: 16px; padding: 14px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+.family-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.family-row li { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 12px; font-weight: 600; }
+.family-row .dim { color: var(--ink-4); }
+.family-face { display: block; flex: none; }
+.family-face.locked { filter: grayscale(1); opacity: 0.35; }
+.family-count { text-align: center; font-size: 13px; color: var(--ink-3); }
+.family-count b { color: var(--accent); }
+.ending-link { border: 0; border-radius: 10px; padding: 9px; background: var(--accent-weak); color: var(--accent); font-weight: 700; font-size: 13px; }
+.space-card { background: linear-gradient(135deg, #141735, #2a1f4f); color: #f1eefc; }
+.space-card .grade-viz { background: #05060f; }
+.space-card .grade-viz span { background: #ffd166; }
+.space-card .grade-sub, .space-card .grade-count small { color: #c9c4e6; }
+.card.story p { text-align: left; }
+.rescue-art { position: relative; margin: -24px -20px 10px; height: 130px; }
+.rescue-art img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; opacity: 0.55; }
+.rescue-art .family-face { position: absolute; left: 50%; bottom: -14px; transform: translateX(-50%); background: var(--paper); border-radius: 50%; padding: 4px; border: 3px solid var(--accent); }
+.card .story-note { font-size: 13px; color: var(--accent); font-weight: 600; text-wrap: pretty; }
+
+/* ── 엔딩 ─────────────────────────────────── */
+.ending { position: relative; align-items: center; justify-content: center; text-align: center; gap: 18px; overflow-y: auto; }
+.stars {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 30% 72%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 55% 12%, #ffd166 50%, transparent 51%),
+    radial-gradient(1px 1px at 72% 40%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 88% 80%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 42% 34%, #c9d2ff 50%, transparent 51%),
+    radial-gradient(2px 2px at 8% 88%, #ff8fb1 50%, transparent 51%),
+    radial-gradient(1px 1px at 94% 14%, #fff 50%, transparent 51%),
+    var(--bg);
+}
+.ending-title { font-family: var(--font-display); font-size: 30px; font-weight: 400; color: var(--accent); text-wrap: balance; }
+.family-photo { margin: 0; }
+.family-photo ol { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 6px; justify-items: center; }
+.family-photo li { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.family-photo .me { grid-row: span 2; align-self: center; }
+.family-photo .me img { width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
+.family-photo .me span { color: var(--accent); }
+.ending-text { display: flex; flex-direction: column; gap: 8px; color: var(--ink-2); max-width: 34ch; }
+.ending-end { font-family: var(--font-display); font-size: 22px; color: var(--ink-3); }
+.ending-home { border: 0; border-radius: 12px; padding: 13px 28px; font-weight: 700; }

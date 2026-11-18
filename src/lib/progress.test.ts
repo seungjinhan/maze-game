@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { checkAdminPassword } from "./admin";
 import {
-  afterClear, clearedInGrade, gradeOpen, isBetter, LAST, lastOpenStage, stageOpen, type Progress,
+  afterClear, clearedInGrade, endingOpen, FINAL, gradeOpen, isBetter, lastOpenStage, rescued, stageOpen, type Progress,
 } from "./progress";
 
 const p = (earned: number, admin = false): Progress => ({ earned, admin });
@@ -28,15 +28,31 @@ describe("진행 · 잠금", () => {
     expect(clearedInGrade(a.progress, 1)).toBe(0);
   });
 
-  it("신 50단계까지 깨면 신도 50/50이에요", () => {
-    const a = afterClear(p(LAST), 4, 50);
-    expect(a).toEqual({ progress: p(LAST + 1), opened: false });
-    expect(clearedInGrade(a.progress, 4)).toBe(50);
-    expect(stageOpen(a.progress, 4, 50)).toBe(true);
+  it("등급의 50단계를 깨면 그 등급의 가족을 구출해요", () => {
+    expect(rescued(p(49), 0)).toBe(false);
+    expect(rescued(p(50), 0)).toBe(true);
+    expect(rescued(p(50), 1)).toBe(false);
+  });
+
+  it("신 50단계를 깨면 숨은 우주가 열리고, 우주를 깨면 엄마 구출 · 엔딩", () => {
+    expect(gradeOpen(p(FINAL - 1), 5)).toBe(false);
+    const a = afterClear(p(FINAL - 1), 4, 50);
+    expect(a).toEqual({ progress: p(FINAL), opened: true });
+    expect(rescued(a.progress, 4)).toBe(true);
+    expect(gradeOpen(a.progress, 5)).toBe(true);
+    expect(stageOpen(a.progress, 5, 1)).toBe(true);
+    expect(endingOpen(a.progress)).toBe(false);
+    const b = afterClear(a.progress, 5, 1);
+    expect(b).toEqual({ progress: p(FINAL + 1), opened: false });
+    expect(rescued(b.progress, 5)).toBe(true);
+    expect(endingOpen(b.progress)).toBe(true);
+    expect(clearedInGrade(b.progress, 4)).toBe(50);
   });
 
   it("관리자는 모두 열지만, 앞질러 깬 단계는 진행에 안 쳐요", () => {
     expect(gradeOpen(p(0, true), 4)).toBe(true);
+    expect(gradeOpen(p(0, true), 5)).toBe(true);
+    expect(rescued(p(0, true), 0)).toBe(false);
     expect(lastOpenStage(p(0, true), 4)).toBe(50);
     expect(afterClear(p(3, true), 4, 50).progress).toEqual(p(3, true));
     expect(afterClear(p(3, true), 0, 4).progress).toEqual(p(4, true));
